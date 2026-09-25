@@ -18,22 +18,34 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
 
-    - name: Run Build
+    - name: Find Project and Build APK
       run: |
-        if [ -f "./gradlew" ]; then
-          chmod +x gradlew
-          ./gradlew assembleDebug
-        elif [ -d "android" ]; then
-          cd android
+        # Search for gradlew file in all subdirectories
+        GRADLEW_PATH=$(find . -name "gradlew" | head -n 1)
+
+        if [ -n "$GRADLEW_PATH" ]; then
+          DIR=$(dirname "$GRADLEW_PATH")
+          echo "Found gradlew in $DIR. Building..."
+          cd "$DIR"
           chmod +x gradlew
           ./gradlew assembleDebug
         else
-          gradle assembleDebug
+          # If no gradlew wrapper, search for build.gradle
+          BUILD_FILE=$(find . -name "build.gradle" | head -n 1)
+          if [ -n "$BUILD_FILE" ]; then
+            DIR=$(dirname "$BUILD_FILE")
+            echo "Found build.gradle in $DIR"
+            cd "$DIR"
+            gradle assembleDebug
+          else
+            echo "No Android project found!"
+            exit 1
+          fi
         fi
 
     - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
-        name: timetable-app-apk
+        name: app-debug
         path: |
           **/build/outputs/apk/debug/*.apk
