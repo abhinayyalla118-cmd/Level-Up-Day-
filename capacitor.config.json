@@ -1,0 +1,6 @@
+{
+  "appId": "com.yourname.timetable",
+  "appName": "Timetable",
+  "webDir": "www",
+  "bundledWebRuntime": false
+}
