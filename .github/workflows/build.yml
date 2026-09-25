@@ -7,7 +7,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     steps:
     - uses: actions/checkout@v4
@@ -15,10 +15,10 @@ jobs:
     - name: Set up Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: '20'
+        node-version: '22'
 
     - name: Set up JDK 17
-      uses: actions/setup-java@v5
+      uses: actions/setup-java@v4
       with:
         java-version: '17'
         distribution: 'temurin'
@@ -33,7 +33,8 @@ jobs:
 
     - name: Setup Capacitor Android
       run: |
-        npm install @capacitor/android@latest
+        npm install @capacitor/core@latest @capacitor/cli@latest @capacitor/android@latest
+        npx cap init RingtoneApp com.example.ringtoneapp --web-dir www || true
         npx cap add android || true
         npx cap copy android || true
         npx cap sync android || true
@@ -43,7 +44,7 @@ jobs:
         if [ -d "android" ]; then
           cd android
           chmod +x gradlew
-          ./gradlew assembleDebug
+          ./gradlew assembleDebug --stacktrace
         else
           echo "Android directory not found!"
           exit 1
@@ -52,7 +53,7 @@ jobs:
     - name: Upload APK Artifact
       uses: actions/upload-artifact@v4
       with:
-        name: timetable-app-apk
+        name: app-debug
         path: |
           android/app/build/outputs/apk/debug/*.apk
           **/*.apk
